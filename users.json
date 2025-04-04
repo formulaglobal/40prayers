@@ -1,0 +1,10 @@
+{
+    "user": {
+        "password": "1234",
+        "email": "user@email.com"
+    },
+    "formula": {
+        "password": "123789",
+        "email": "formulaglobalinfo@gmail.com"
+    }
+}
