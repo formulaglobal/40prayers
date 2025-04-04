@@ -138,7 +138,7 @@ def extract_number(filename):
         return int(match.group(1))
     return float('inf')
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_video(video_path):
     with open(video_path, "rb") as file:
         return file.read()
