@@ -5,14 +5,14 @@ import re
 from PIL import Image
 import base64
 
-# Page configuration
+# Configuração da página
 st.set_page_config(
-    page_title="40 Prayers to Archangel Michael with FRIAR GILSON",
+    page_title="40 Prayers to Archangel Michael",
     page_icon="✨",
-    layout="wide",
+    layout="centered",
 )
 
-# Custom CSS
+# CSS leve e responsivo
 st.markdown(
     """
     <style>
@@ -21,35 +21,38 @@ st.markdown(
         color: #4A90E2;
         text-align: center;
         font-family: 'Georgia', serif;
-        font-size: 2.5rem;
+        font-size: 1.8rem;
+    }
+    video {
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     .stDownloadButton button {
         background-color: #FF0000;
         color: white;
-        border-radius: 5px;
-        padding: 15px 30px;
-        font-size: 18px;
-        width: 400px;
-        margin: 0 auto;
-        display: block;
+        border-radius: 8px;
+        font-size: 16px;
+        width: 100%;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# Top image
+# Imagem no topo
 image_path = "sao_miguel.jpg"
 if os.path.exists(image_path):
-    st.image(Image.open(image_path), width=120)
+    st.image(Image.open(image_path), use_column_width=True)
 else:
     st.warning("Image not found. Please check the path.")
 
-# Title
+# Título
 st.title("40 Prayers to Archangel Michael with FRIAR GILSON")
 st.markdown("---")
 
-# Load video list
+# Utilitários
 def extract_number(filename):
     match = re.search(r'prayer\s*(\d+)', filename, re.IGNORECASE)
     if match:
@@ -59,67 +62,62 @@ def extract_number(filename):
 @st.cache_data(show_spinner=False)
 def load_video(video_path):
     with open(video_path, "rb") as file:
-        return file.read()
+        return base64.b64encode(file.read()).decode()
 
+# Vídeos
 videos = sorted([f for f in os.listdir() if f.endswith(".mp4")], key=extract_number)
 
-# Load descriptions if available
+# Descrições (se houver)
 descriptions = {}
 if os.path.exists("descricoes.json"):
     with open("descricoes.json", "r", encoding="utf-8") as f:
         descriptions = json.load(f)
 
-# Initial video count
+# Quantidade de vídeos por lote
 if 'video_count' not in st.session_state:
     st.session_state.video_count = 5
 
-# Display videos
+# Exibição
 if not videos:
-    st.error("No videos found in the current folder.")
+    st.error("No videos found in this folder.")
 else:
-    st.markdown('<div style="font-size: 0.9rem; color: #666; text-align: center;">Please wait a few seconds while the videos load...</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div style="font-size: 0.9rem; color: #666; text-align: center;">Please wait a moment while the content loads...</div>', unsafe_allow_html=True)
 
     for i, video in enumerate(videos[:st.session_state.video_count]):
-        st.write(f"### Prayer {i+1:02d} - {video}")
-        if video in descriptions:
-            st.write(descriptions[video])
-
-        video_data = load_video(video)
-        video_base64 = base64.b64encode(video_data).decode()
-        video_html = f'''
-        <div style="display: flex; justify-content: center;">
-            <video width="400" controls style="max-width: 100%; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        with st.expander(f"▶️ Prayer {i+1:02d} - {video}"):
+            if video in descriptions:
+                st.write(descriptions[video])
+            video_base64 = load_video(video)
+            video_html = f'''
+            <video controls>
                 <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-        </div>
-        '''
-        st.markdown(video_html, unsafe_allow_html=True)
+            '''
+            st.markdown(video_html, unsafe_allow_html=True)
 
-        with open(video, "rb") as file:
-            st.download_button(
-                label=f"Download {video}",
-                data=file,
-                file_name=video,
-                mime="video/mp4",
-                key=f"download_{video}",
-            )
-
+            with open(video, "rb") as file:
+                st.download_button(
+                    label=f"⬇️ Download Prayer {i+1:02d}",
+                    data=file,
+                    file_name=video,
+                    mime="video/mp4",
+                    key=f"download_{video}"
+                )
         st.markdown("---")
 
-    # Load more button
+    # Botão para carregar mais
     if st.session_state.video_count < len(videos):
         if st.button("🔄 Load More Videos"):
             st.session_state.video_count += 5
 
-# Final CTA
+# CTA final
 if st.session_state.video_count >= len(videos):
     st.markdown(
         """
-        <div style="text-align: center; margin-top: 30px; font-size: 1.1rem; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
-            <p>Get 30 more prayers to attract wealth and prosperity ➡️ 
-            <a href="https://lastlink.com/p/C5D1D8C18/checkout-payment/" target="_blank">Click Here</a></p>
+        <div style="text-align: center; margin-top: 20px; font-size: 1rem; padding: 15px; background-color: #f8f9fa; border-radius: 10px;">
+            <p>Want 30 more powerful prayers to attract wealth and prosperity? ➡️ 
+            <a href="https://lastlink.com/p/C5D1D8C18/checkout-payment/" target="_blank">Click here</a></p>
         </div>
         """,
         unsafe_allow_html=True
