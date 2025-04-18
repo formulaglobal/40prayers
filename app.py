@@ -5,14 +5,14 @@ import re
 from PIL import Image
 import base64
 
-# Configuração da página
+# Page config
 st.set_page_config(
     page_title="40 Prayers to Archangel Michael",
     page_icon="✨",
     layout="centered",
 )
 
-# CSS leve e responsivo
+# Minimal mobile-first CSS
 st.markdown(
     """
     <style>
@@ -41,18 +41,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Imagem no topo
+# Image at the top
 image_path = "sao_miguel.jpg"
 if os.path.exists(image_path):
-    st.image(Image.open(image_path), use_column_width=True)
+    st.image(Image.open(image_path), use_container_width=True)
 else:
     st.warning("Image not found. Please check the path.")
 
-# Título
+# Title
 st.title("40 Prayers to Archangel Michael with FRIAR GILSON")
 st.markdown("---")
 
-# Utilitários
+# Utilities
 def extract_number(filename):
     match = re.search(r'prayer\s*(\d+)', filename, re.IGNORECASE)
     if match:
@@ -64,29 +64,33 @@ def load_video(video_path):
     with open(video_path, "rb") as file:
         return base64.b64encode(file.read()).decode()
 
-# Vídeos
+# Load videos
 videos = sorted([f for f in os.listdir() if f.endswith(".mp4")], key=extract_number)
 
-# Descrições (se houver)
+# Load descriptions if available
 descriptions = {}
 if os.path.exists("descricoes.json"):
     with open("descricoes.json", "r", encoding="utf-8") as f:
         descriptions = json.load(f)
 
-# Quantidade de vídeos por lote
+# Session state: how many to show
 if 'video_count' not in st.session_state:
     st.session_state.video_count = 5
 
-# Exibição
+# Display videos
 if not videos:
     st.error("No videos found in this folder.")
 else:
-    st.markdown('<div style="font-size: 0.9rem; color: #666; text-align: center;">Please wait a moment while the content loads...</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div style="font-size: 0.9rem; color: #666; text-align: center;">Please wait a moment while content loads...</div>',
+        unsafe_allow_html=True
+    )
 
     for i, video in enumerate(videos[:st.session_state.video_count]):
         with st.expander(f"▶️ Prayer {i+1:02d} - {video}"):
             if video in descriptions:
                 st.write(descriptions[video])
+
             video_base64 = load_video(video)
             video_html = f'''
             <video controls>
@@ -104,14 +108,15 @@ else:
                     mime="video/mp4",
                     key=f"download_{video}"
                 )
+
         st.markdown("---")
 
-    # Botão para carregar mais
+    # Load more button
     if st.session_state.video_count < len(videos):
         if st.button("🔄 Load More Videos"):
             st.session_state.video_count += 5
 
-# CTA final
+# Final CTA
 if st.session_state.video_count >= len(videos):
     st.markdown(
         """
